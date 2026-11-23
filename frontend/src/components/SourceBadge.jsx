@@ -7,35 +7,35 @@ export default function SourceBadge({ sources }) {
   if (!sources || sources.length === 0) return null;
 
   return (
-    <div className="mt-3 pt-3 border-t border-slate-700/60">
+    <div className="mt-2.5 pt-2.5 border-t border-slate-700/60 font-sans">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 text-xs font-medium text-emerald-400 hover:text-emerald-300 transition-colors bg-emerald-950/40 border border-emerald-800/50 px-2.5 py-1.5 rounded-lg"
+        className="flex items-center gap-1.5 text-xs font-medium text-amber-300 hover:text-amber-200 transition-colors bg-slate-900 border border-slate-700/80 px-2.5 py-1 rounded-md cursor-pointer"
       >
-        <BookOpen size={14} />
-        <span>{sources.length} Sumber Referensi SOP Ditemukan</span>
-        {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        <BookOpen size={13} className="text-amber-400" />
+        <span>{sources.length} Referensi Dokumen Terlampir</span>
+        {isOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
       </button>
 
       {isOpen && (
-        <div className="mt-2.5 space-y-2">
+        <div className="mt-2 space-y-1.5">
           {sources.map((src, idx) => (
             <div
               key={idx}
-              className="p-3 rounded-lg bg-slate-900/90 border border-slate-700/70 text-xs text-slate-300 shadow-sm"
+              className="p-2.5 rounded-lg bg-slate-950/90 border border-slate-700 text-xs text-slate-300"
             >
-              <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-slate-800">
-                <span className="font-semibold text-emerald-300 flex items-center gap-1.5">
-                  <FileText size={13} />
+              <div className="flex items-center justify-between mb-1 pb-1 border-b border-slate-800">
+                <span className="font-semibold text-slate-200 flex items-center gap-1.5">
+                  <FileText size={12} className="text-amber-400" />
                   {src.doc || 'Dokumen SOP'}
                 </span>
                 {src.page && (
-                  <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[11px] font-mono">
+                  <span className="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded text-[10px] font-mono">
                     Halaman {src.page}
                   </span>
                 )}
               </div>
-              <p className="italic text-slate-400 bg-slate-950/50 p-2 rounded border border-slate-800/80 leading-relaxed font-sans">
+              <p className="text-slate-400 bg-slate-900/60 p-2 rounded border border-slate-800 leading-relaxed font-sans text-[11px]">
                 "{src.snippet}"
               </p>
             </div>
@@ -45,4 +45,3 @@ export default function SourceBadge({ sources }) {
     </div>
   );
 }
-

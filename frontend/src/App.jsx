@@ -234,7 +234,7 @@ export default function App() {
         answer:
           '⚠️ Maaf, server backend tidak dapat dihubungi (' +
           (res.error || 'Connection Refused') +
-          '). Pastikan backend Flask di port 5000 sudah berjalan, atau gunakan tombol "Mode Dummy" di sidebar untuk melihat demo UI.',
+          '). Pastikan backend Flask di port 5000 sudah berjalan, atau gunakan tombol "Mode Demo" di sidebar untuk melihat demo UI.',
         sources: [],
       };
       setMessages((prev) => [...prev, errorReply]);
