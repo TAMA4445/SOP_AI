@@ -9,6 +9,8 @@ data/**/*.pdf
 
 # Vector database (local persistent store)
 chroma_db/
+data/local_db.json
+
 
 # Python cache & virtual environments
 __pycache__/
@@ -30,3 +32,10 @@ ENV/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+
