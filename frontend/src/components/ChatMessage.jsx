@@ -98,3 +98,4 @@ export default function ChatMessage({ message, onFeedback }) {
     </div>
   );
 }
+

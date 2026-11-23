@@ -26,7 +26,11 @@ export default function LoginPage({ onLoginSuccess, onUseDummy }) {
       setStoredUser(res.data.user);
       onLoginSuccess(res.data.user, false);
     } else {
-      setError(res.error || 'Login gagal. Periksa koneksi backend atau coba mode demo.');
+      if (res.error?.includes('500') || res.error?.includes('fetch') || res.error?.includes('Failed')) {
+        setError('Server Backend (port 5000) belum berjalan. Sebagai tim Frontend, kamu bisa langsung klik tombol "Mode Dummy (Demo UI)" di bawah!');
+      } else {
+        setError(res.error || 'Login gagal. Periksa username dan password.');
+      }
     }
   };
 
@@ -56,9 +60,20 @@ export default function LoginPage({ onLoginSuccess, onUseDummy }) {
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-950/60 border border-rose-800/80 text-rose-300 text-xs flex items-start gap-2">
-            <span className="font-bold">⚠️</span>
-            <span>{error}</span>
+          <div className="mb-4 p-3 rounded-xl bg-rose-950/60 border border-rose-800/80 text-rose-300 text-xs flex flex-col gap-1.5">
+            <div className="flex items-start gap-2">
+              <span className="font-bold">⚠️</span>
+              <span>{error}</span>
+            </div>
+            {error.includes('Mode Dummy') && (
+              <button
+                type="button"
+                onClick={onUseDummy}
+                className="mt-1 w-full py-2 px-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs transition-colors cursor-pointer text-center shadow-sm"
+              >
+                👉 Langsung Masuk ke Mode Demo Sekarang
+              </button>
+            )}
           </div>
         )}
 
@@ -156,3 +171,4 @@ export default function LoginPage({ onLoginSuccess, onUseDummy }) {
     </div>
   );
 }
+
