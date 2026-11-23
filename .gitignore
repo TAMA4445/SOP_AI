@@ -9,6 +9,8 @@ data/**/*.pdf
 
 # Vector database (local persistent store)
 chroma_db/
+data/local_db.json
+
 
 # Python cache & virtual environments
 __pycache__/
