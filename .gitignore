@@ -1,3 +1,32 @@
+# PDFs
 data/*.pdf
 data/**/*.pdf
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Vector database (local persistent store)
+chroma_db/
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
