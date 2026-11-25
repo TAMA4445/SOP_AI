@@ -1,66 +1,59 @@
-# Laporan Evaluasi Model Prediksi Potensi Risiko Insiden K3
+﻿# Evaluasi Model Prediksi Level Insiden K3
 
-**Proyek:** SOP-AI / SOP-GPT  
-**Peran:** Orang 2 (Model Engineer)  
-**Tanggal:** 25 November 2026  
-**Artefak Model:** `ml/model.joblib`  
-**Dataset Latih:** `ml/data/train.csv` (328 baris)  
-**Dataset Uji:** `ml/data/test.csv` (83 baris)  
+**Model:** TF-IDF (ngram 1-2, sublinear TF) + Random Forest (250 pohon, class_weight balanced)
+**Data:** train 328 baris, test 83 baris
+**Kelas:** I sampai V (level VI pada data asli digabung ke V saat pembersihan data)
+**Artefak:** `ml/model.joblib` | **Fungsi:** `ml/predict.py` -> `predict_risk()`
+**Evaluasi:** `ml/evaluate.py` -> `ml/reports/metrics.json` dan `confusion_matrix.png`
 
----
+## Cara Pembuatan Model
+Hanya satu konfigurasi yang dilatih, yaitu TF-IDF + Random Forest. Tidak ada
+perbandingan dengan algoritma lain, tidak ada cross-validation, dan tidak ada
+pencarian hyperparameter. Dengan demikian angka pada test set tidak dipakai
+untuk memilih atau menyetel model, tetapi juga belum ada bukti bahwa Random
+Forest adalah pilihan terbaik untuk data ini.
 
-## 1. Ringkasan Arsitektur & Aturan Kelas
-- **Algoritma:** TF-IDF Vectorizer (ngram 1-2, sublinear TF) + Random Forest Classifier (250 estimators, balanced class weights).
-- **Skema Kelas:** Hanya ada **5 kelas risiko ('I' sampai 'V')**. Tidak ada kelas 'VI' karena sampel VI telah digabungkan ke 'V' pada tahap pembersihan data.
-- **Ekstraksi Kelas:** Daftar kelas target selalu diekstraksi dinamis dari atribut `model.classes_` = `['I', 'II', 'III', 'IV', 'V']`.
+## Hasil di Test Set (83 baris)
 
----
+| Metrik | Model | Baseline (selalu tebak IV) |
+|---|---|---|
+| Accuracy | 0.434 | 0.337 |
+| F1 macro | 0.447 | 0.101 |
+| Akurasi dalam toleransi +-1 level | 0.759 | - |
 
-## 2. Distribusi Data Latih (328 Baris)
-| Kelas | Jumlah Baris | Persentase | Status |
-|:---:|:---:|:---:|:---|
-| **IV** | 110 | 33.54% | **Kelas Mayoritas (Majority Class)** |
-| **III** | 85 | 25.91% | Kelas Sedang |
-| **II** | 76 | 23.17% | Kelas Ringan |
-| **I** | 34 | 10.37% | Kelas Minoritas (Near Miss) |
-| **V** | 23 | 7.01% | Kelas Minoritas (Kritis / Fatalitas) |
-| **TOTAL** | **328** | **100.00%** | |
+Model lebih baik dari baseline, tetapi data uji hanya 83 baris sehingga selisih
+ini belum stabil secara statistik.
 
----
+## Hasil per Kelas
 
-## 3. Hasil Perbandingan: Model Utama vs Baseline "Selalu Tebak Kelas Mayoritas"
+| Level | Jumlah uji | Recall | F1 baseline | F1 model |
+|---|---|---|---|---|
+| I | 9 | 0.56 | 0.000 | 0.714 |
+| II | 19 | 0.63 | 0.000 | 0.471 |
+| III | 21 | 0.38 | 0.000 | 0.340 |
+| IV | 28 | 0.36 | 0.505 | 0.426 (turun dari baseline) |
+| V | 6 | 0.17 | 0.000 | 0.286 |
 
-Baseline **"Selalu Tebak Kelas Mayoritas"** memprediksi seluruh sampel uji sebagai kelas **'IV'**. Model utama berhasil mengungguli baseline secara signifikan di seluruh metrik, terutama kemampuan mendeteksi kelas non-mayoritas (I, II, III, dan V) yang mendapat skor 0.00 pada baseline.
+## Confusion Matrix (baris = aktual, kolom = prediksi)
 
-| Tingkat Risiko | Jumlah Uji (Support) | F1-Score Baseline (Tebak IV) | F1-Score Model (TF-IDF + RF) | Kenaikan (Gain) |
-|:---:|:---:|:---:|:---:|:---:|
-| **Kelas I** | 9 | 0.0000 | **0.7143** | **+0.7143** |
-| **Kelas II** | 19 | 0.0000 | **0.4706** | **+0.4706** |
-| **Kelas III** | 21 | 0.0000 | **0.3404** | **+0.3404** |
-| **Kelas IV** | 28 | 0.5045 | **0.4255** | **+-0.0790** |
-| **Kelas V** | 6 | 0.0000 | **0.2857** | **+0.2857** |
-| **Macro Average** | **83** | **0.1009** | **0.4473** | **+0.3464** |
-| **Weighted Average** | **83** | **0.1702** | **0.4355** | **+0.2653** |
-| **Overall Accuracy** | **83** | **0.3373** | **0.4337** | **+0.0964** |
+|  | Pred I | Pred II | Pred III | Pred IV | Pred V |
+|---|---|---|---|---|---|
+| Aktual I | 5 | 0 | 3 | 1 | 0 |
+| Aktual II | 0 | 12 | 4 | 3 | 0 |
+| Aktual III | 0 | 10 | 8 | 3 | 0 |
+| Aktual IV | 0 | 10 | 8 | 10 | 0 |
+| Aktual V | 0 | 0 | 3 | 2 | 1 |
 
----
+## Catatan Penting
+- **Level V hanya terdeteksi 1 dari 6 kasus (recall 17%).** Kasus pada level
+  tertinggi banyak terlewat. F1 0.286 berasal dari satu tebakan benar.
+- Level IV justru turun F1-nya dibanding baseline.
+- Akurasi +-1 level (75.9%) berarti prediksi sering meleset maksimal satu
+  tingkat, bukan salah jauh. Ini relevan karena level berurutan.
 
-## 4. Confusion Matrix (Dataset Uji 83 Baris)
-
-Baris: Kelas Aktual | Kolom: Kelas Prediksi `['I', 'II', 'III', 'IV', 'V']`
-
-```text
-       Pred I   Pred II  Pred III Pred IV  Pred V
-Akt I    5       0        3        1        0
-Akt II   0       12       4        3        0
-Akt III  0       10       8        3        0
-Akt IV   0       10       8        10       0
-Akt V    0       0        3        2        1
-```
-
----
-
-## 5. Kesimpulan Kinerja
-1. **Peningkatan Drastis Macro-F1:** Nilai Macro-F1 melonjak dari **0.10** pada baseline menjadi **0.45** pada model Random Forest (+0.35).
-2. **Kemampuan Deteksi Kelas Langka:** Model mampu mendeteksi potensi insiden Kelas I (Near Miss, F1: **0.71**) dan Kelas V (Kritis/Fatal, F1: **0.29**), yang sama sekali tidak dapat terdeteksi oleh baseline.
-3. **Kepatuhan Arsitektur:** Fungsi `predict_risk()` siap digunakan oleh modul API/Backend untuk inferensi waktu nyata.
+## Keterbatasan
+- Data kecil (328 latih, 83 uji); kelas V hanya 23 data latih.
+- Kelas tidak seimbang; hasil per kelas naik-turun antar pembagian data.
+- Hanya satu model yang dicoba, tanpa validasi silang.
+- Input berbahasa Inggris (sesuai dataset).
+- Hasil bersifat indikatif dan **bukan pengganti penilaian ahli K3**.
