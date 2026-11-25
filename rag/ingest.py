@@ -41,6 +41,30 @@ def _embed_texts(texts: list[str]) -> list[list[float]]:
     return embedder.embed_documents(texts)
 
 
+def delete_document(doc_name: str) -> bool:
+    """Hapus seluruh chunk vektor dokumen dari ChromaDB berdasarkan nama file.
+
+    Parameters
+    ----------
+    doc_name : str
+        Nama file dokumen (misal: 'SOP_LOTO.pdf' atau path).
+
+    Returns
+    -------
+    bool
+        True jika berhasil (atau dokumen memang tidak ada), False jika error.
+    """
+    try:
+        clean_name = Path(doc_name).name
+        _, collection = _get_chroma_collection()
+        existing = collection.get(where={"doc": clean_name})
+        if existing and existing["ids"]:
+            collection.delete(ids=existing["ids"])
+        return True
+    except Exception:
+        return False
+
+
 def ingest(file_path: str) -> dict:
     """Ingest satu file PDF ke ChromaDB.
 
